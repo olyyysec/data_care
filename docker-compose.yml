@@ -8,7 +8,12 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: python app.py
+    command: python -c "from app import app; app.run(host='0.0.0.0', port=5000, debug=True)"  # ⬅️ CORREÇÃO
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   streamlit-front:
     build: .
@@ -19,6 +24,7 @@ services:
     working_dir: /app
     environment:
       - BACKEND_URL=http://modelo-back:5000
-    command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    command: streamlit run front.py --server.port=8501 --server.address=0.0.0.0
     depends_on:
-      - modelo-back
+      modelo-back:
+        condition: service_healthy

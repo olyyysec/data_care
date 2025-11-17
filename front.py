@@ -170,9 +170,11 @@ def classificar_imc(imc):
 # Função para fazer predição - CORRIGIDA
 def fazer_predicao(payload):
     try:
-        # URL corrigida para o endpoint correto
+        # ⬇️ CORREÇÃO: Usa variável de ambiente do Docker Compose
+        BACKEND_URL = os.getenv('BACKEND_URL', 'http://modelo-back:5000')
+        
         response = requests.post(
-            "http://localhost:5000/predict",
+            f"{BACKEND_URL}/predict",
             json=payload,
             headers={"Content-Type": "application/json"},
             timeout=30
@@ -181,7 +183,6 @@ def fazer_predicao(payload):
         if response.status_code == 200:
             return response.json()
         else:
-            # Tenta obter mais informações do erro
             error_text = response.text
             try:
                 error_json = response.json()
@@ -191,7 +192,7 @@ def fazer_predicao(payload):
             return {"error": f"Erro no servidor: {response.status_code} - {error_text}"}
             
     except requests.exceptions.ConnectionError:
-        return {"error": "Não foi possível conectar ao servidor. Verifique se o Flask está rodando na porta 5000."}
+        return {"error": f"Não foi possível conectar ao servidor em {BACKEND_URL}. Verifique se o Flask está rodando."}
     except Exception as e:
         return {"error": f"Erro na conexão: {str(e)}"}
 
@@ -495,6 +496,7 @@ def datacare_page():
                         st.write(resultado)
                         
                         # Verificação de conexão
+                        BACKEND_URL = os.getenv('BACKEND_URL', 'http://modelo-back:5000')
                         st.write("**Verificação de conexão:**")
                         try:
                             test_response = requests.get("http://localhost:5000/", timeout=5)

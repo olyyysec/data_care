@@ -263,7 +263,14 @@ def build_X_from_input(payload: dict):
 # Routes
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("datacare.html")
+    return jsonify({
+        "status": "online",
+        "message": "DataCare Backend API",
+        "endpoints": {
+            "predict": "POST /predict - Calcular probabilidade de diabetes",
+            "download": "GET /consultas/<filename> - Download de PDF"
+        }
+    })
 
 @app.route("/predict", methods=["POST"])
 def predict():
